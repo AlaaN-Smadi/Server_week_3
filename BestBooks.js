@@ -58,7 +58,7 @@ function seedMyFavoriteBooks(){
 
 
 function componentDidMount(req,res){
-    // seedMyFavoriteBooks();
+    // seedMyFad voriteBooks();
 
 
     const myEmail = req.query.email;
