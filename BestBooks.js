@@ -56,16 +56,23 @@ function seedMyFavoriteBooks(){
 }
 
 
+function addNewBookFunc(req,res){
+    const { bookName, bookStatus, bookDesc, imgUrl } = req.bod
+}
+
+
 
 function componentDidMount(req,res){
-    // seedMyFad voriteBooks();
+    // seedMyFavoriteBooks()
 
 
     const myEmail = req.query.email;
 
+    console.log(userModel)
     userModel.find({email:myEmail},function(error,ownerData){
         if(error) {
             console.log("did not work")
+            
             res.send('did not work')
         } else {
             console.log(ownerData)
