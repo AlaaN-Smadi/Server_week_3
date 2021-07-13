@@ -9,6 +9,7 @@ const cors = require('cors');
 // const axios = require('axios');
 
 const componentDidMount = require('./BestBooks')
+// const addUserBooks = require('./addUserBooks')
 
 const server = express();  //   name  of  the  server,  to manage process
 const PORT = process.env.PORT;  //  PORT  name  and  number 
@@ -17,6 +18,9 @@ server.use(cors());
 
 server.get('/books',componentDidMount)
 
+server.post('/addNewBook', addNewBookFunc)
+
+// server.get('/addBook', addUserBooks)
 
 server.get('/', (req, res) => {
     res.send('  Welcome  To  Alaa  Server  ')
