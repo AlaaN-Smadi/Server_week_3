@@ -1,12 +1,17 @@
 'use strict';
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
+
+mongoose.connect('mongodb://AloshSmadi:MqG8webtRfEHSaH2@cluster0-shard-00-00.jj9nx.mongodb.net:27017,cluster0-shard-00-01.jj9nx.mongodb.net:27017,cluster0-shard-00-02.jj9nx.mongodb.net:27017/myLogInApp?ssl=true&replicaSet=atlas-xwabrw-shard-0&authSource=admin&retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+
+
 
 
 require('dotenv').config();  //   to  activate  .env  file 
 // const axios = require('axios');
 
+
+const functionGroups = {}
 
 
 const BookSchema = new mongoose.Schema({
@@ -20,60 +25,86 @@ const Books = new mongoose.Schema({
     books: [BookSchema]
 });
 
-const userModel = mongoose.model('Auther', Books);
+let userModel = mongoose.model('Auther', Books);
 
-function seedMyFavoriteBooks(){
-    const successBooks = new userModel({
-        email: 'alaasmadi1010@gmail.com',
-        books: [
-            {
-                name: 'act like a success ',
-                description: 'Act Like a Success, Think Like a Success is a book about success that is rich with anecdotes from Steve’s life—from sleeping in his car to becoming the $40 million dollar man! This invaluable guide is written for everyone, whether you are just beginning your career or are well situated in the c-suite. ',
-                status: ' rate : 4.10 out of 5'
-            },
-            {
-                name: "How to Get Common Sense Even If You Don't Know What It Is Kindle Edition",
-                description: "What is common sense? Whatever you want to learn about common sense this book has it. It's the complete common sense education. There're common sense examples, lack of common sense examples and common sense quotes. You'll learn what common sense is, how to improve common sense and logic, and how to make common sense decisions. If you want to improve common sense, or understand it better, this book will help you.",
-                status: 'rate : 2.0 out of 5'
-            }
-        ]
-    });
+functionGroups.seedMyFavoriteBooks = (meMail) => {
+
 
     const wealthBooks = new userModel({
-        email: 'alaaads27@gmail.com',
+        email: meMail,
         books: [
             {
-                name: 'The Way to Wealth',
-                description: `The first American book on personal finance, "The Way to Wealth" by Benjamin Franklin is still the best and wisest money book ever written. Originally published in 1758 as the preface to "Poor Richard's Almanack," this little gem has been through innumerable printings and sold millions of copies to those in search of smart but entertaining advice about hard work, earning and saving money and debt.`,
-                status: 'rate : 4.6 out of 5'
+                name: 'First Book',
+                description: `First Description`,
+                status: 'First Status'
             }
         ]
     });
 
-    successBooks.save();
+
     wealthBooks.save();
 
+    return wealthBooks
+
 }
 
 
-function addNewBookFunc(req,res){
-    const { bookName, bookStatus, bookDesc, imgUrl } = req.bod
+functionGroups.addNewBookFunc = (req, res) => {
+    const { bookName, bookStatus, bookDesc, imgUrl, MyNewBookemail } = req.body
+
+    console.log(req.body)
+
+    console.log(req.body.email)
+
+    userModel.find({ email: req.body.email }, function (error, ownerData) {
+        if (error) {
+            console.log("did not work")
+
+            res.send('did not work')
+        } else {
+            console.log(req.body.email)
+
+            console.log(ownerData[0])
+
+            ownerData[0].books.push({
+                name: req.body.bookName,
+                description: req.body.bookDesc,
+                status: req.body.bookStatus
+            })
+            ownerData[0].save()
+
+            console.log(ownerData)
+
+            res.send(ownerData)
+        }
+
+
+    })
+
+
 }
 
 
 
-function componentDidMount(req,res){
-    // seedMyFavoriteBooks()
+functionGroups.componentDidMount = (req, res) => {
 
 
-    const myEmail = req.query.email;
+
+    let myEmail = req.query.email;
 
     console.log(userModel)
-    userModel.find({email:myEmail},function(error,ownerData){
-        if(error) {
-            console.log("did not work")
-            
-            res.send('did not work')
+    console.log(myEmail)
+
+    // myEmail
+    userModel.find({ email: myEmail }, function (error, ownerData) {
+        if (error) {
+            // console.log("did not work")
+
+            let dataNew = functionGroups.seedMyFavoriteBooks(myEmail)
+            console.log(dataNew)
+            let newArr = [dataNew]
+            res.send(newArr)
+
         } else {
             console.log(ownerData)
             res.send(ownerData)
@@ -82,5 +113,88 @@ function componentDidMount(req,res){
 }
 
 
-module.exports = componentDidMount;
+
+//  delete  =>  /deleteMyBook
+
+functionGroups.deleteMyBook = (rec, res) => {
+    console.log('delete')
+
+    console.log(rec.query)
+    console.log(rec.params)
+
+    let id = Number(rec.params.bookID)
+    let myEmail = rec.query.email
+
+    console.log("id = ", id)
+    console.log("email = ", myEmail)
+
+
+    userModel.find({ email: myEmail }, function (error, ownerData) {
+        if (error) {
+            // console.log("did not work")
+
+            console.log("Error")
+            res.send('Data could not find ')
+
+        } else {
+            console.log(ownerData[0].books)
+
+            let newArr = ownerData[0].books.filter((book, index) => {
+                if (index !== id)
+                    return true
+            })
+
+            console.log(newArr)
+
+            ownerData[0].books = newArr
+
+            ownerData[0].save();
+
+            console.log(ownerData[0].books)
+
+            res.send(ownerData)
+        }
+    })
+
+}
+
+
+//  updateFun  =>  /updateFun
+
+functionGroups.updateFun = (rec, res) => {
+    console.log('update')
+
+
+    let id = Number(rec.params.bookID)
+    let myEmail = rec.body.params.email
+    let myName = rec.body.params.name
+    let myDesc = rec.body.params.desc
+    let myStatus = rec.body.params.status
+    let myUrl = rec.body.params.url
+
+    console.log(id)
+    console.log(myEmail)
+
+    userModel.find({ email: myEmail }, function (error, ownerData) {
+        if (error) {
+            // console.log("did not work")
+
+            console.log("Error")
+            res.send('Data could not find ')
+
+        } else {
+            console.log(ownerData[0].books[id])
+
+            ownerData[0].books[id].name = myName
+            ownerData[0].books[id].description = myDesc
+            ownerData[0].books[id].status = myStatus
+
+            ownerData[0].save()
+            res.send(ownerData)
+        }
+    })
+
+}
+
+module.exports = functionGroups;
 

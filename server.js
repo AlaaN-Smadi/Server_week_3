@@ -8,21 +8,32 @@ require('dotenv').config();  //   to  activate  .env  file
 const cors = require('cors');
 // const axios = require('axios');
 
-const componentDidMount = require('./BestBooks')
+const functionGroups = require('./BestBooks')
 // const addUserBooks = require('./addUserBooks')
 
 const server = express();  //   name  of  the  server,  to manage process
 const PORT = process.env.PORT;  //  PORT  name  and  number 
 server.use(cors());
+// server.use(express.bodyParser());
+server.use(express.json())
 
 
-server.get('/books',componentDidMount)
 
-server.post('/addNewBook', addNewBookFunc)
+server.get('/books', functionGroups.componentDidMount)
+
+server.post('/addNewBook', functionGroups.addNewBookFunc)
+
+server.delete('/deleteMyBook/:bookID', functionGroups.deleteMyBook)
+
+
+server.put('/updateFun/:bookID', functionGroups.updateFun)
 
 // server.get('/addBook', addUserBooks)
 
+
+
 server.get('/', (req, res) => {
+    
     res.send('  Welcome  To  Alaa  Server  ')
 })
 
